@@ -1,5 +1,5 @@
 
-!pip install dicttoxml optuna datasets nbimporter
+## !pip install dicttoxml optuna datasets nbimporter
 import data_fetching
 import preprocessing
 import training
