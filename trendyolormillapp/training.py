@@ -9,6 +9,7 @@ from google.colab import files
 import preprocessing
 import torch.nn as nn
 from transformers import BertModel, BertPreTrainedModel
+from transformers import AutoConfig
 
 def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=7):
     """
@@ -32,8 +33,17 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
             pooled_output = outputs[1]
             
             # Bigram ve trigramları birleştir
-            bigram_trigram_features = torch.cat([bigrams.unsqueeze(1), trigrams.unsqueeze(1)], dim=1)
-            pooled_output = torch.cat([pooled_output, bigram_trigram_features], dim=1)
+            bigram_trigram_features = []
+            if bigrams is not None and trigrams is not None:
+                bigram_trigram_features = torch.cat([bigrams.unsqueeze(1), trigrams.unsqueeze(1)], dim=1)
+            elif bigrams is not None:
+                bigram_trigram_features = bigrams.unsqueeze(1)
+            elif trigrams is not None:
+                bigram_trigram_features = trigrams.unsqueeze(1)
+            
+            if bigram_trigram_features:
+                pooled_output = torch.cat([pooled_output, bigram_trigram_features], dim=1)
+
     
             pooled_output = self.dropout(pooled_output)
             logits = self.classifier(pooled_output)
@@ -46,29 +56,36 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
             return (loss, logits) if loss is not None else logits
  
     ## model = AutoModelForSequenceClassification.from_pretrained(modelname, num_labels=2)
-    model = CustomBertForSequenceClassification.from_pretrained(modelname, num_labels=2)
+    config = AutoConfig.from_pretrained(modelname)
+    config.num_labels = 2  # Kaç sınıf olduğunu belirtiyoruz
+
+    model = CustomBertForSequenceClassification.from_pretrained(modelname, config=config)
     tokenizer = AutoTokenizer.from_pretrained(modelname)
 
     # **Preprocessing ve n-gramları ekleme**
     encodings = preprocessing.preprocess_with_ngrams(texts, tokenizer)
+
+    # Eğer `bigram_features` ve `trigram_features` hala string olarak duruyorsa, onları indekslere çevir
+    encodings["bigram_features"] = tokenizer(encodings["bigram_features"], padding="max_length", truncation=True, max_length=128)["input_ids"]
+    encodings["trigram_features"] = tokenizer(encodings["trigram_features"], padding="max_length", truncation=True, max_length=128)["input_ids"]
     labels = list(scores)
 
     class CustomDataset(Dataset):
-    def __init__(self, encodings, labels):
-        self.encodings = encodings
-        self.labels = labels
-        self.bigrams = encodings["bigram_features"]
-        self.trigrams = encodings["trigram_features"]
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items() if key not in ["bigram_features", "trigram_features"]}
-        item["bigrams"] = torch.tensor(self.bigrams[idx])  # Bigramları ekle
-        item["trigrams"] = torch.tensor(self.trigrams[idx])  # Trigramları ekle
-        item["labels"] = torch.tensor(self.labels[idx])
-        return item
+        def __init__(self, encodings, labels):
+            self.encodings = encodings
+            self.labels = labels
+            self.bigrams = encodings["bigram_features"]
+            self.trigrams = encodings["trigram_features"]
+    
+        def __len__(self):
+            return len(self.labels)
+    
+        def __getitem__(self, idx):
+            item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items() if key not in ["bigram_features", "trigram_features"]}
+            item["bigrams"] = torch.tensor(self.bigrams[idx])  # Bigramları ekle
+            item["trigrams"] = torch.tensor(self.trigrams[idx])  # Trigramları ekle
+            item["labels"] = torch.tensor(self.labels[idx])
+            return item
 
 
     train_dataset = CustomDataset(encodings, labels)
