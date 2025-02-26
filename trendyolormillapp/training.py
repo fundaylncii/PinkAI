@@ -95,7 +95,7 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
     if savemodel:
         if not savemodeltext:
             raise ValueError("savemodeltext must be provided if savemodel is True.")
-        save_path = f"/content/drive/MyDrive/NLP_Models/{savemodeltext}"
+        save_path = f"/content/{savemodeltext}"
         model.save_pretrained(save_path)
         tokenizer.save_pretrained(save_path)
 
@@ -104,7 +104,7 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
         if not savemodeltext:
             raise ValueError("savemodeltext must be provided if downloadmodel is True.")
         shutil.make_archive(savemodeltext, 'zip', save_path)
-        save_zip = f"/content/drive/MyDrive/NLP_Models/{savemodeltext}.zip"
+        save_zip = f"/content/{savemodeltext}.zip"
         files.download(save_zip)
 
     return model, tokenizer, best_params
