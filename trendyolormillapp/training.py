@@ -59,7 +59,7 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
     config = AutoConfig.from_pretrained(modelname)
     config.num_labels = 2  # Kaç sınıf olduğunu belirtiyoruz
 
-    model = CustomBertForSequenceClassification.from_pretrained(modelname, config=config)
+    model = CustomBertForSequenceClassification.from_pretrained(modelname, config=config, ignore_mismatched_sizes=True)
     tokenizer = AutoTokenizer.from_pretrained(modelname)
 
     # **Preprocessing ve n-gramları ekleme**
