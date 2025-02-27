@@ -19,13 +19,8 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
     model = AutoModelForSequenceClassification.from_pretrained(modelname, num_labels=2)
     tokenizer = AutoTokenizer.from_pretrained(modelname)
 
-    # **Preprocessing ve n-gramları ekleme**
     encodings = preprocessing.preprocess_with_ngrams(texts, tokenizer)
-
-    # Eğer `bigram_features` ve `trigram_features` hala string olarak duruyorsa, onları indekslere çevir
-    encodings["bigram_features"] = tokenizer(encodings["bigram_features"], padding="max_length", truncation=True, max_length=128)["input_ids"]
-    encodings["trigram_features"] = tokenizer(encodings["trigram_features"], padding="max_length", truncation=True, max_length=128)["input_ids"]
-    labels = list(scores)
+    labels = torch.tensor(scores, dtype=torch.long)
 
     class CustomDataset(Dataset):
         def __init__(self, encodings, labels):
