@@ -115,6 +115,9 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
 
     # Hugging Face'e modeli yükleme
     if hugpush:
+        ## huggingface girişi
+        from huggingface_hub import notebook_login
+        notebook_login()
         model.push_to_hub(modelname)
         tokenizer.push_to_hub(modelname)
         print(f"Model başarıyla Hugging Face'e yüklendi: https://huggingface.co/{modelname}")
