@@ -10,6 +10,7 @@ import preprocessing
 import torch.nn as nn
 from transformers import AutoConfig
 from huggingface_hub import notebook_login
+from huggingface_hub import HfApi
 
 def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=5, hugpush=False):
     """
