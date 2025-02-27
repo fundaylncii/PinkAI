@@ -116,19 +116,10 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
 
     # Hugging Face'e modeli yükleme (Eğer giriş başarılıysa ve token girilmişse)
     if hugpush:
-        try:
-            print("Hugging Face'e giriş yapmanız gerekiyor.")
-            token = input("Hugging Face Token'ınızı girin: ")
-            login(token=token)
-            user_info = whoami()  # Kullanıcı giriş kontrolü
-            if user_info:
-                model.push_to_hub(hf_model_name)
-                tokenizer.push_to_hub(hf_model_name)
-                print(f"Model başarıyla Hugging Face'e yüklendi: https://huggingface.co/{hf_model_name}")
-            else:
-                print("Hugging Face girişi başarısız, modeli yükleyemiyoruz.")
-        except Exception as e:
-            print(f"Hugging Face'e yükleme başarısız: {e}")
+        model.push_to_hub(modelname)
+        tokenizer.push_to_hub(modelname)
+        print(f"Model başarıyla Hugging Face'e yüklendi: https://huggingface.co/{modelname}")
+            
 
 
     return model, tokenizer, best_params
