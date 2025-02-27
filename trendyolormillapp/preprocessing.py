@@ -39,30 +39,22 @@ def clean_text(text):
 
     return text
 
-def generate_ngrams(texts, n=2):
-    """
-    Verilen metinlerden n-gram özellikleri oluşturur.
-    """
-    if not texts or all(t.strip() == "" for t in texts):
-        return []  # Boş veya sadece stopwords içeren metinler için boş liste dön
-    
-    vectorizer = CountVectorizer(ngram_range=(n, n))
-    try:
-        ngram_matrix = vectorizer.fit_transform(texts)
-        return vectorizer.get_feature_names_out()
-    except ValueError:
-        return []  # Eğer hata oluşursa (boş kelime listesi) yine boş dön
-
 def preprocess_with_ngrams(texts, tokenizer):
     """
-    BERT tokenizasyonu uygular ve n-gram özelliklerini ekler.
+    XLM-Roberta tokenizasyonu uygular ve n-gram özelliklerini ekler.
     """
-    encodings = tokenizer(list(texts), max_length=128, truncation=True, padding="max_length")
+    if not isinstance(texts, list) or not all(isinstance(t, str) for t in texts):
+        raise ValueError("texts must be a list of strings. Lütfen giriş verisini kontrol edin.")
+
+    encodings = tokenizer(
+        list(texts), max_length=128, truncation=True, padding="max_length", return_tensors="pt"
+    )
 
     # N-gram özelliklerini çıkar
-    bigrams = generate_ngrams(texts, n=2)
-    trigrams = generate_ngrams(texts, n=3)
+    bigrams = [generate_ngrams([text], n=2) for text in texts]
+    trigrams = [generate_ngrams([text], n=3) for text in texts]
 
+    # Encoding içine n-gram özelliklerini ekle
     encodings["bigram_features"] = bigrams
     encodings["trigram_features"] = trigrams
 
