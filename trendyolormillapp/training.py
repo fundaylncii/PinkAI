@@ -114,10 +114,12 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
         save_zip = f"/content/{savemodeltext}.zip"
         files.download(save_zip)
 
-    # Hugging Face'e modeli yükleme (Eğer giriş başarılıysa)
+    # Hugging Face'e modeli yükleme (Eğer giriş başarılıysa ve token girilmişse)
     if hugpush:
         try:
-            notebook_login()
+            print("Hugging Face'e giriş yapmanız gerekiyor.")
+            token = input("Hugging Face Token'ınızı girin: ")
+            login(token=token)
             user_info = whoami()  # Kullanıcı giriş kontrolü
             if user_info:
                 model.push_to_hub(hf_model_name)
