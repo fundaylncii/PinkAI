@@ -9,6 +9,7 @@ from google.colab import files
 import preprocessing
 import torch.nn as nn
 from transformers import AutoConfig
+from huggingface_hub import notebook_login
 
 def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=5, hugpush=False):
     """
@@ -116,7 +117,6 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
     # Hugging Face'e modeli yükleme
     if hugpush:
         ## huggingface girişi
-        from huggingface_hub import notebook_login
         notebook_login()
         model.push_to_hub(modelname)
         tokenizer.push_to_hub(modelname)
