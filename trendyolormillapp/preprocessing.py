@@ -39,6 +39,20 @@ def clean_text(text):
 
     return text
 
+def generate_ngrams(texts, n=2):
+    """
+    Verilen metinlerden n-gram özellikleri oluşturur.
+    """
+    if not texts or all(t.strip() == "" for t in texts):
+        return []  # Boş veya sadece stopwords içeren metinler için boş liste dön
+    
+    vectorizer = CountVectorizer(ngram_range=(n, n))
+    try:
+        ngram_matrix = vectorizer.fit_transform(texts)
+        return vectorizer.get_feature_names_out().tolist()
+    except ValueError:
+        return []  # Eğer hata oluşursa (boş kelime listesi) yine boş dön
+
 def preprocess_with_ngrams(texts, tokenizer):
     """
     XLM-Roberta tokenizasyonu uygular ve n-gram özelliklerini ekler.
@@ -50,11 +64,9 @@ def preprocess_with_ngrams(texts, tokenizer):
         list(texts), max_length=128, truncation=True, padding="max_length", return_tensors="pt"
     )
 
-    # **Bigram ve trigramları oluştur**
     bigrams = [generate_ngrams([text], n=2) for text in texts]
     trigrams = [generate_ngrams([text], n=3) for text in texts]
 
-    # **N-gramları encoding içine ekle**
     encodings["bigram_features"] = tokenizer(
         bigrams, padding="max_length", truncation=True, max_length=128, return_tensors="pt"
     )["input_ids"]
