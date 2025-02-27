@@ -10,7 +10,7 @@ import preprocessing
 import torch.nn as nn
 from transformers import AutoConfig
 
-def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=7):
+def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=5):
     """
     Modeli verilen verilerle fine-tune eder, en iyi hiperparametreleri belirler ve kaydeder.
     """
