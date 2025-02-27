@@ -8,7 +8,6 @@ from torch.utils.data import Dataset
 from google.colab import files 
 import preprocessing
 import torch.nn as nn
-from transformers import BertModel, BertPreTrainedModel
 from transformers import AutoConfig
 
 def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=7):
@@ -17,49 +16,7 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
     """
     os.environ["WANDB_DISABLED"] = "true"
     
-    class CustomBertForSequenceClassification(BertPreTrainedModel):
-        def __init__(self, config):
-            super().__init__(config)
-            self.bert = BertModel(config)
-            self.dropout = nn.Dropout(config.hidden_dropout_prob)
-            
-            # Bigram ve trigram eklemek için giriş katmanını genişletiyoruz
-            self.classifier = nn.Linear(config.hidden_size + 2, config.num_labels)
-    
-            self.init_weights()
-    
-        def forward(self, input_ids, attention_mask=None, bigrams=None, trigrams=None, labels=None):
-            outputs = self.bert(input_ids, attention_mask=attention_mask)
-            pooled_output = outputs[1]
-            
-            # Bigram ve trigramları birleştir
-            bigram_trigram_features = []
-            if bigrams is not None and trigrams is not None:
-                bigram_trigram_features = torch.cat([bigrams.unsqueeze(1), trigrams.unsqueeze(1)], dim=1)
-            elif bigrams is not None:
-                bigram_trigram_features = bigrams.unsqueeze(1)
-            elif trigrams is not None:
-                bigram_trigram_features = trigrams.unsqueeze(1)
-            
-            if bigram_trigram_features:
-                pooled_output = torch.cat([pooled_output, bigram_trigram_features], dim=1)
-
-    
-            pooled_output = self.dropout(pooled_output)
-            logits = self.classifier(pooled_output)
-    
-            loss = None
-            if labels is not None:
-                loss_fct = nn.CrossEntropyLoss()
-                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
-    
-            return (loss, logits) if loss is not None else logits
- 
-    ## model = AutoModelForSequenceClassification.from_pretrained(modelname, num_labels=2)
-    config = AutoConfig.from_pretrained(modelname)
-    config.num_labels = 2  # Kaç sınıf olduğunu belirtiyoruz
-
-    model = CustomBertForSequenceClassification.from_pretrained(modelname, config=config, ignore_mismatched_sizes=True)
+    model = AutoModelForSequenceClassification.from_pretrained(modelname, num_labels=2)
     tokenizer = AutoTokenizer.from_pretrained(modelname)
 
     # **Preprocessing ve n-gramları ekleme**
