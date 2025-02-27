@@ -10,7 +10,7 @@ import preprocessing
 import torch.nn as nn
 from transformers import AutoConfig
 
-def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=5):
+def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, downloadmodel=False, trials=5, hugpush=False):
     """
     Modeli verilen verilerle fine-tune eder, en iyi hiperparametreleri belirler ve kaydeder.
     """
@@ -112,5 +112,12 @@ def model_tuning(modelname, texts, scores, savemodel=False, savemodeltext=None, 
         shutil.make_archive(savemodeltext, 'zip', save_path)
         save_zip = f"/content/{savemodeltext}.zip"
         files.download(save_zip)
+
+    # Hugging Face'e modeli yükleme
+    if hugpush:
+        model.push_to_hub(modelname)
+        tokenizer.push_to_hub(modelname)
+        print(f"Model başarıyla Hugging Face'e yüklendi: https://huggingface.co/{modelname}")
+
 
     return model, tokenizer, best_params
