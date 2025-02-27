@@ -50,15 +50,21 @@ def preprocess_with_ngrams(texts, tokenizer):
         list(texts), max_length=128, truncation=True, padding="max_length", return_tensors="pt"
     )
 
-    # N-gram özelliklerini çıkar
+    # **Bigram ve trigramları oluştur**
     bigrams = [generate_ngrams([text], n=2) for text in texts]
     trigrams = [generate_ngrams([text], n=3) for text in texts]
 
-    # Encoding içine n-gram özelliklerini ekle
-    encodings["bigram_features"] = bigrams
-    encodings["trigram_features"] = trigrams
+    # **N-gramları encoding içine ekle**
+    encodings["bigram_features"] = tokenizer(
+        bigrams, padding="max_length", truncation=True, max_length=128, return_tensors="pt"
+    )["input_ids"]
+
+    encodings["trigram_features"] = tokenizer(
+        trigrams, padding="max_length", truncation=True, max_length=128, return_tensors="pt"
+    )["input_ids"]
 
     return encodings
+
 
 def feature_engineering(rate):
     """
