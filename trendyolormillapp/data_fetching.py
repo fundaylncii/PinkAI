@@ -4,7 +4,7 @@ import re
 import pandas as pd
 import cloudscraper
 
-def get_reviews(product_link, get_page = 100, save_path=False):
+def get_reviews(product_link, get_page = 100, save_path=False, channel_no = 0):
     content_id_match = re.search(r'p-(\d+)', product_link)
     if content_id_match:
         content_id = content_id_match.group(1)
@@ -13,8 +13,15 @@ def get_reviews(product_link, get_page = 100, save_path=False):
         print("Geçerli bir URL'de contentId bulunamadı.")
         return None
 
-    api_url = f"https://apigw.trendyol.com/discovery-web-websfxsocialreviewrating-santral/product-reviews-detailed?&contentId={content_id}"
-    ## api_url = f"https://apigw.trendyol-milla.com/discovery-web-websfxsocialreviewrating-santral/product-reviews-detailed?&contentId={content_id}"
+    if channel_no == 1:
+        api_url = f"https://apigw.trendyol.com/discovery-web-websfxsocialreviewrating-santral/product-reviews-detailed?&contentId={content_id}"
+    elif channel_no == 2:
+        api_url = f"https://apigw.trendyol-milla.com/discovery-web-websfxsocialreviewrating-santral/product-reviews-detailed?&contentId={content_id}"
+    else:
+        print("Geçerli bir kanal id girini! (Trendyol : 1 , Trendyolmilla : 2)")
+        return None
+        
+
     print(api_url)
     scraper = cloudscraper.create_scraper()
     response = scraper.get(api_url)
