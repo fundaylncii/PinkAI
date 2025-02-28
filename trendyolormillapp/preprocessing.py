@@ -8,15 +8,6 @@ import re
 nltk.download("stopwords")
 sw = stopwords.words("turkish")
 
-# Yorumdaki kelimelerin sıklığını hesapla
-word_freq = text.apply(lambda x: pd.Series(x.split())).stack().value_counts()
-
-# En çok kullanılan kelimeleri koru
-dynamic_keep_words = set(word_freq[word_freq > 10].index)  # 10'dan fazla geçenleri tut
-
-# Final stopwords listesi
-filtered_sw = set(sw) - (dynamic_keep_words)
-
 def clean_text(text):
     """
     Yorum metinlerini temizler ve ön işler:
