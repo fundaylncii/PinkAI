@@ -8,6 +8,10 @@ import re
 nltk.download("stopwords")
 sw = stopwords.words("turkish")
 
+## yorum anlam bağlamını korumak için çıkartılmayacak kelimeler
+keep_words = {"ama", "çok", "gibi", "aldım", "beğendim", "fakat", "çünkü", "bence", "bile", "şöyle", "aslında", "kesinlikle", "baya", "neyse", "özellikle", "yani"}  # Bağlamı koruyacak kelimeler
+filtered_sw = sw - keep_words
+
 def clean_text(text):
     """
     Yorum metinlerini temizler ve ön işler:
@@ -25,7 +29,7 @@ def clean_text(text):
     # Sayıları kaldır
     text = text.str.replace(r"\d+", "", regex=True)
     # Stopwords kaldır
-    text = text.apply(lambda x: " ".join(word for word in x.split() if word not in sw))
+    text = text.apply(lambda x: " ".join(word for word in x.split() if word not in filtered_sw))
 
     # Nadir kelimeleri kaldırma
     word_freq = text.apply(lambda x: pd.Series(x.split())).stack().value_counts()
