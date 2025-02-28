@@ -8,9 +8,14 @@ import re
 nltk.download("stopwords")
 sw = stopwords.words("turkish")
 
-## yorum anlam bağlamını korumak için çıkartılmayacak kelimeler
-keep_words = {"ama", "çok", "gibi", "aldım", "beğendim", "fakat", "çünkü", "bence", "bile", "şöyle", "aslında", "kesinlikle", "baya", "neyse", "özellikle", "yani"}  # Bağlamı koruyacak kelimeler
-filtered_sw = set(sw) - keep_words
+# Yorumdaki kelimelerin sıklığını hesapla
+word_freq = text.apply(lambda x: pd.Series(x.split())).stack().value_counts()
+
+# En çok kullanılan kelimeleri koru
+dynamic_keep_words = set(word_freq[word_freq > 10].index)  # 10'dan fazla geçenleri tut
+
+# Final stopwords listesi
+filtered_sw = set(sw) - (dynamic_keep_words)
 
 def clean_text(text):
     """
@@ -33,13 +38,8 @@ def clean_text(text):
 
     # Nadir kelimeleri kaldırma
     word_freq = text.apply(lambda x: pd.Series(x.split())).stack().value_counts()
-    rare_words = word_freq[word_freq < 5].index
+    rare_words = word_freq[word_freq < 3].index
     text = text.apply(lambda x: " ".join(word for word in x.split() if word not in rare_words))
-
-    # En çok kullanılan kelimeleri göster
-    top_words = word_freq.head(5)
-    print("En çok kullanılan kelimeler:")
-    print(top_words)
 
     return text
 
