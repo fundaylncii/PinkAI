@@ -10,7 +10,7 @@ sw = stopwords.words("turkish")
 
 ## yorum anlam bağlamını korumak için çıkartılmayacak kelimeler
 keep_words = {"ama", "çok", "gibi", "aldım", "beğendim", "fakat", "çünkü", "bence", "bile", "şöyle", "aslında", "kesinlikle", "baya", "neyse", "özellikle", "yani"}  # Bağlamı koruyacak kelimeler
-filtered_sw = sw - keep_words
+filtered_sw = set(sw) - keep_words
 
 def clean_text(text):
     """
