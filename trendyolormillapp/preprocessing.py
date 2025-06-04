@@ -71,13 +71,9 @@ def preprocess_with_ngrams(texts, tokenizer):
         list(texts), max_length=128, truncation=True, padding="max_length", return_tensors="pt"
     )
 
-    # **Bigram ve trigramları oluştur ve düz listeye çevir**
-    bigrams = [ngram for text in texts for ngram in generate_ngrams(text, n=2)]
-    trigrams = [ngram for text in texts for ngram in generate_ngrams(text, n=3)]
-
-    # Eğer bigram veya trigram yoksa, boş string listesi ata
-    bigrams = bigrams if bigrams else [""]
-    trigrams = trigrams if trigrams else [""]
+    # **Her metin için ayrı n-gram dizeleri oluştur**
+    bigrams = [" ".join(generate_ngrams(text, n=2)) for text in texts]
+    trigrams = [" ".join(generate_ngrams(text, n=3)) for text in texts]
 
     # **N-gramları encoding içine ekle**
     encodings["bigram_features"] = tokenizer(
